@@ -1,8 +1,15 @@
 //expressをモジュールで読み込む
 import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config();
+import {sakikoDb} from './sakiko-db.js';
+sakikoDb.init();//データベースの初期化
+
 //expressを実行してappに代入
 const app = express();
 const PORT = 3000;
+
+app.use(express.json());
 
 
 //ルーティング。トップページ
@@ -29,8 +36,10 @@ app.get('/cart', (req, res) => {
     });
 
 //ログインページ
-app.get('/login', (req, res) => {
-    res.send('ログインだよ');
+app.post('/login', (req, res) => {
+    const body = req.body;
+    console.log(body);
+    res.send(body);
     });
 //マイページ
 app.get('/account', (req, res) => {
