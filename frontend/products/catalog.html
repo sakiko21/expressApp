@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品一覧</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <style>
+    
+    @media screen and (min-width: 768px) {
+        div#product-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 25px;
+            grid-template-rows: 1fr 1fr 1fr 1fr;  
+            padding: 30px;
+        }
+
+    }
+    @media screen and (max-width: 767px) {
+        div#product-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            grid-template-rows: 1fr 1fr 1fr 1fr;
+            padding: 30px;
+        }
+
+    }
+    .product-item {
+        border: 1px solid #ddd;
+    }
+    .product-info {
+        text-align: center;
+        padding: 10px;
+    }
+    .product-a{
+        text-decoration: none;
+    }
+    img{
+        width: 100%;
+    }
+
+    </style>
+    <div class="container">
+        <h2 class="page-title">商品一覧</h2>
+        <div id="product-list">
+        <!-- 商品一覧はこの中に追加される -->
+        </div>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+
+        fetch('/products')
+        .then(response => response.json())
+        .then(products => {
+            // 商品一覧を表示するためのdiv要素を取得
+            const productList = document.getElementById('product-list');
+            
+            // 登録されている商品の数だけループを回す
+            products.forEach(product => {
+                
+                // 商品の情報を表示するためのdiv要素を作成
+                const productItem = document.createElement('div');
+                // 商品の情報を表示するためのdiv要素にproduct-itemクラスを追加
+                productItem.classList.add('product-item');
+                //div.product-itemの中身
+                productItem.innerHTML = `
+                    <div class="product-card">
+                        <a href="/products/product.html?id=${product.id}" class="product-a">
+                            <div class="product-image">
+                                <img src="${product.image_path}" alt="${product.title}">
+                            </div>
+                            <div class="product-info">
+                                <h2>${product.title}</h2>
+                                <p>${product.price}円</p>
+                            </div>
+                        </a>
+                    </div>
+                `;
+                
+                // 商品一覧のdiv要素の中に商品の情報を表示するためのdiv要素を追加
+                productList.appendChild(productItem);
+            });
+        })
+        .catch(err => console.error('エラーが発生:', err));
+    </script>
+</body>
+</html>

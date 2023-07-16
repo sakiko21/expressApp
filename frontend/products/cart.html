@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="container">
+        <h2 class="page-title">カートページ</h2>
+        <div id="cart-container"></div>
+        <div id="total-amount"></div>
+        <button id="purchase-button">購入</button>
+        <button id="clear-button">カートをクリア</button>
+        <a href="/products/catalog"><button id="back-button" >商品一覧に戻る</button></a>
+    </div>
+    <script>
+        window.onload = function() {
+            // カート情報を取得
+            const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+            // カート内商品の合計金額を計算する関数を実装する
+            const calculateTotalAmount = (cart) => {
+                let totalAmount = 0;
+                cart.forEach(item => {
+                    totalAmount += item.price * item.quantity;
+                });
+                return totalAmount;
+            };
+    
+            // カート情報を表示（例: リストやテーブルなどの要素を生成し、カート情報を埋め込む）
+            const cartContainer = document.getElementById("cart-container");
+            if (cart.length === 0) {
+                // カートが空の場合の表示
+                cartContainer.textContent = 'カートは空です';
+            } else {
+                // カート内の商品を表示
+                const table = document.createElement("table");
+                const tableHeader = document.createElement("tr");
+                tableHeader.innerHTML = `
+                    <th>商品ID</th>
+                    <th>商品名</th>
+                    <th>数量</th>
+                    <th>価格</th>
+                    
+                `;
+                table.appendChild(tableHeader);
+    
+                cart.forEach(item => {
+                    const tableRow = document.createElement("tr");
+                    tableRow.innerHTML = `
+                        <td>${item.productId}</td>
+                        <td>${item.title}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.quantity * item.price}</td>
+                    `;
+                    table.appendChild(tableRow);
+                });
+                cartContainer.appendChild(table);
+            
+                const totalAmount = calculateTotalAmount(cart);
+                const totalAmountContainer = document.getElementById("total-amount");
+                totalAmountContainer.textContent = `合計金額: ${totalAmount}円`;
+                
+
+                //削除ボタンを押した時の処理
+                const cartClear = document.getElementById("clear-button");
+                cartClear.addEventListener("click", () => {
+                    localStorage.removeItem("cart");
+                    alert("カートをクリアしました");
+                    location.reload();
+                });
+                //購入ボタンを押した時の処理
+                const purchaseButton = document.getElementById("purchase-button");
+                purchaseButton.addEventListener("click", () => {
+                    
+                    //購入情報をデータベース保存
+                    //userId変数に、現在ログインしているユーザーのIDを代入。phpは使用しない
+                    const userId = 1;
+                    const productIds = cart.map(item => item.productId);
+                    const amount = calculateTotalAmount(cart); // カート内商品の合計金額を計算する関数を実装する
+
+                    const purchaseData = {
+                        user_id: userId,
+                        product_ids: JSON.stringify(productIds),
+                        amount: amount,
+                    };
+                    console.log(productIds);
+                    fetch("/purchase/create", {
+                        method:"POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(purchaseData),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        alert("購入しました");
+                        localStorage.removeItem("cart");
+                        location.reload();
+                    });
+                });
+            }
+        };
+        </script>
+</body>
+</html>

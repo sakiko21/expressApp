@@ -70,7 +70,52 @@ export const sakikoDb = {
                 CREATE TABLE purchase (
                     id SERIAL PRIMARY KEY,
                     user_id INTEGER NOT NULL,
-                    FOREIGN KEY (user_id) REFERENCES users(id),
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+                    amount INTEGER NOT NULL,
+                    product_ids JSONB[] NOT NULL,
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );`
+            );
+        };
+        //purchase_detailテーブルの作成
+        const hasPurchaseDetailTable = await client.query(
+            `SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name = 'purchase_detail'
+            );`
+        );
+        if (!hasPurchaseDetailTable.rows[0].exists) {
+            console.log("purchase_detailテーブルを作成");
+            await client.query(`
+                CREATE TABLE purchase_detail (
+                    id SERIAL PRIMARY KEY,
+                    purchase_id INTEGER NOT NULL,
+                    FOREIGN KEY (purchase_id) REFERENCES purchase(id) ON DELETE SET NULL,
+                    product_id INTEGER NOT NULL,
+                    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL,
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );`
+            );
+        };
+
+        //cartテーブルの作成
+        const hasCartTable = await client.query(
+            `SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name = 'cart'
+            );`
+        );
+        if (!hasCartTable.rows[0].exists) {
+            console.log("cartテーブルを作成");
+            await client.query(`
+                CREATE TABLE cart (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
                     amount INTEGER NOT NULL,
                     product_ids INTEGER NOT NULL,
                     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -80,17 +125,28 @@ export const sakikoDb = {
     },
 //ユーザーの作成
 createUser: async (name, email, password) => {
-    const client = await sakikoDb.connect();
-    const result = await client.query(
-        `INSERT INTO users (name, email, password)
-        VALUES ($1, $2, $3)
-        RETURNING *;`,
-        [name, email, password]
-    );
-    return result.rows[0];          
+    try { //エラーハンドリング
+        const client = await sakikoDb.connect();
+        const user = await sakikoDb.getUser(email);
+        if (user) {
+            return {error: 'このメールアドレスは既に登録されています。'};
+        } else {
+            const result = await client.query(
+                `INSERT INTO users (name, email, password)
+                VALUES ($1, $2, $3)
+                RETURNING *;`,
+                [name, email, password]
+            );
+            return result.rows[0];
+        }
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }        
 },
 //ユーザー情報の取得
 getUser: async (email) => {
+    try{
     const client = await sakikoDb.connect();
     const result = await client.query(
         `SELECT * FROM users
@@ -98,34 +154,171 @@ getUser: async (email) => {
         [email]
     );
     return result.rows[0];
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
 },
+//ユーザー情報の更新
+updateUser: async (id, name, email, password) => {
+    try{
+    const client = await sakikoDb.connect();
+    const result = await client.query(
+        `UPDATE users
+        SET name = $2, email = $3, password = $4
+        WHERE id = $1
+        RETURNING *;`,
+        [id, name, email, password]
+    );
+    return result.rows[0]|| { message: "ユーザーが見つかりません"};
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
+},
+//ユーザー情報の削除
+deleteUser: async (id) => {
+    try{
+    const client = await sakikoDb.connect();
+    const result = await client.query(
+        `DELETE FROM users
+        WHERE id = $1
+        RETURNING *;`,
+        [id]
+    );
+    return result.rows[0]|| { message: "ユーザーが見つかりません"};
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
+},
+
+//商品の作成
+createProduct: async (title, description, price, image_path) => {
+    try { //エラーハンドリング
+        const client = await sakikoDb.connect();
+        const result = await client.query(
+            `INSERT INTO products (title, description, price, image_path)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *;`,
+            [title, description, price, image_path]
+        );
+        return result.rows[0];
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
+},
+
 //商品情報の取得
-getProductById: async (id) => {
+getProducts: async () => {
+    try{
+    const client = await sakikoDb.connect();
+    const result = await client.query(
+        `SELECT * FROM products;`
+    );
+    return result.rows;
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
+},
+
+getProduct: async (id) => {
+    try{
     const client = await sakikoDb.connect();
     const result = await client.query(
         `SELECT * FROM products WHERE id = $1;`,
         [id]
     );
-    return result.rows[0];
+    return result.rows[0] || {message:'商品が見つかりません'};
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
+},
+//商品情報の削除
+deleteProduct: async (id) => {
+    try{
+    const client = await sakikoDb.connect();
+    const result = await client.query(
+        `DELETE FROM products
+        WHERE id = $1
+        RETURNING *;`,
+        [id]
+    );
+    return result.rows[0] || {message:'商品が見つかりません'};
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
+},
+//商品情報の更新
+
+updateProduct: async (id, title, description, price, image_path) => {
+    try{
+    const client = await sakikoDb.connect();
+    const result = await client.query(
+        `UPDATE products
+        SET title = $2, description = $3, price = $4, image_path = $5
+        WHERE id = $1
+        RETURNING *;`,
+        [id, title, description, price, image_path]
+    );
+    return result.rows[0] || {message:'商品が見つかりません'};
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
 },
 //購入情報の取得
 getPurchase: async (userId) => {
+    try{
     const client = await sakikoDb.connect();
     const result = await client.query(
         `SELECT * FROM purchase WHERE user_id = $1;`,
         [userId]
     );
     return result.rows[0];
+    } catch (error) {
+        console.log(error);
+        return {error: '予期せぬエラーが発生しました。'};
+    }
 },
-//購入情報の更新
-updateProduct: async (userId, productId, amount, productIds) => {
-    const client = await sakikoDb.connect();
-    const result = await client.query(
-        `INSERT INTO purchase (user_id, product_id, amount, product_ids)
-        VALUES ($1, $2, $3, $4)
-        RETURNING *;`,
-        [userId, productId, amount, productIds]
-    );
-    return result.rows[0];
-}
-}
+//購入情報の作成
+createPurchase: async (userId, productIds, amount) => {
+    try { //エラーハンドリング
+        const client = await sakikoDb.connect();
+        const result = await client.query(
+            `INSERT INTO purchase (user_id, product_ids, amount)
+            VALUES ($1, $2::INTEGER[], $3)
+            RETURNING *;`,
+            [userId, productIds, amount]
+        );
+        console.log(productIds)
+        return result.rows[0];
+    } catch (error) {
+        console.log(error);
+        console.log(productIds)
+        return {error: '予期せぬエラーが発生しました。'};
+        
+    }
+},
+// //カートに追加用のデータベース
+// createCart: async (userId, productId, amount) => {
+//     try { //エラーハンドリング
+//         const client = await sakikoDb.connect();
+//         const result = await client.query(
+//             `INSERT INTO cart (user_id, product_ids, amount)
+//             VALUES ($1, $2, $3)
+//             RETURNING *;`,
+//             [userId, productId, amount]
+//         );
+//         return result.rows[0];
+//     } catch (error) {
+//         console.log(error);
+//         return {error: '予期せぬエラーが発生しました。'};
+//     }
+
+// }
+ }

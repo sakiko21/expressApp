@@ -1,0 +1,38 @@
+/*******************
+全体
+*******************/
+
+.small-container {
+    max-width: 600px;
+    width: 90%;
+    margin: auto;
+}
+.page-title{
+    text-align: center;
+}
+.form-area{
+    display: flex;
+    flex-direction: column;
+}
+.form-area input{
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+textarea#description {
+    width: 100%;
+}
+.center-button{
+    text-align: center;
+    display: block;
+    margin:auto;
+}
+a{
+    text-decoration: none;
+    color:#000;
+}
+/*******************
+商品一覧ページ
+*******************/

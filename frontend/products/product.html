@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品詳細ページ</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <style>
+    @media screen and (min-width: 768px) {
+        .product-detail-container {
+            display: flex;
+            padding: 30px;
+        }
+        .product-image {
+            width: 50%;
+            padding: 20px;
+        }
+        img {
+            width: 100%;
+        }
+        .product-info {
+            width: 50%;
+            padding: 20px;
+        }
+    }
+    @media screen and (max-width: 767px) {
+        .product-detail-container {
+            padding: 30px;
+        }
+        .product-image {
+            width: 100%;
+            padding: 20px;
+        }
+        img {
+            width: 100%;
+        }
+        .product-info {
+            width: 100%;
+            padding: 20px;
+        }
+    }
+
+    </style>
+    <div class="container">
+        <h2 class="page-title">商品詳細ページ</h2>
+        <div id="product-detail">
+        <!-- 商品詳細ページ -->
+        </div>
+    </div>
+    <script>
+    window.onload = function() {
+    // URLから商品IDを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    // 商品IDを元にAPIを呼び出して商品詳細を取得
+    fetch(`/api/product/${productId}`)
+        .then(response => response.json())
+        .then(product => {
+
+            // 商品一覧を表示するためのdiv要素を取得
+            const productDetail = document.getElementById("product-detail");
+                //中身
+                const productInfo = document.createElement("div");
+                productInfo.classList.add("product-detail-container");
+                productInfo.innerHTML = `
+                    <div class="product-image">
+                        <img src="${product.image_path}" alt="${product.title}">
+                    </div>
+                    <div class="product-info">
+                        <h2>${product.title}</h2>
+                        <p>${product.description}</p>
+                        <p>${product.price}円</p>
+                        <span>数量</span>
+                        <select id="quantity" name="quantity" style="display:inline;">
+                            ${generateQuantityOptions()}
+                        </select>
+                        <button id="add-to-cart-button" type="submit" style="display:block;">カートに追加</button>
+                    </div>
+                `;
+                productDetail.appendChild(productInfo);
+                // カートに追加フォームの送信イベントを処理
+                const addToCartButton = document.getElementById('add-to-cart-button');
+                addToCartButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const quantity = document.getElementById("quantity").value;
+                    addToCart(product.id, product.title, quantity, product.price);
+                    alert(`${product.title}を${quantity}個カートに追加しました`);
+                    // カートページに遷移
+                    window.location.href = "/products/cart";
+                });
+        })
+        .catch(err => console.error("エラーが発生:", err));
+}
+
+
+// 数量の選択肢を生成する関数
+function generateQuantityOptions() {
+    let options = "";
+    for (let i = 1; i <= 10; i++) {
+        options += `<option value="${i}">${i}</option>`;
+    }
+    return options;
+}
+
+function addToCart(productId, title, quantity, price) {
+    console.log(`カートに商品を追加: productId=${productId}, quantity=${quantity}, price=${price}`);
+    // カート情報を取得（既存のカート情報がある場合は取得し、ない場合は空の配列として初期化）
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    // 既存の商品があるかチェック(cart内の商品IDと追加する商品IDが一致するか確認)
+    const existingItem = cart.find(item => item.productId === productId);
+
+    if (existingItem) {
+        // 既存の商品がある場合（cart内の商品IDと追加する商品IDが一致する場合）、数量を加算する
+        console.log("既存の商品が存在します")
+        console.log("existingItem.quantity", existingItem.quantity);
+        console.log("quantity", quantity);
+        existingItem.quantity += parseInt(quantity, 10);
+    } else {
+        // 既存の商品がない場合、新しい商品として追加する
+        console.log("既存の商品が存在しません")
+        cart.push({
+            productId: productId,
+            title: title,
+            quantity: parseInt(quantity, 10),
+            price:price
+        });
+    }
+    // カート情報をローカルストレージに保存
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+    </script>
+</body>
+</html>
