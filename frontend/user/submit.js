@@ -16,7 +16,7 @@ function submit () {
                 alert(data.error);
             } else {
                 alert("登録完了");
-                location.href = "/user/account";
+                location.href = `/user/account.html?id=${user.id}`;
             }
         })
         .catch((err) => {

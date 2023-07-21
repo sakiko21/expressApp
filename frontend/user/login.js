@@ -18,7 +18,7 @@ function login () {
                 alert(data.error);
             } else {
                 alert("ログイン完了");
-                location.href = "/user/account";
+                location.href = "/user/account.html";
             }
         })
         .catch((err) => {

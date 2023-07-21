@@ -33,25 +33,49 @@ purchaseRouter(app);
 const STATIC_PATH = `${process.cwd()}/frontend`;//process.cwdでルートディレクトリへのパスを取得
 app.use(serveStatic(STATIC_PATH, {index:["index.html"] }));
 
-app.get("/*", (req, res) => {
-    console.log(STATIC_PATH + req.originalUrl + ".html");
-    const contentHtml = readFileSync(STATIC_PATH + req.originalUrl + ".html", "utf-8");//Syncがないと非同期処理になる
-    res
-        .status(200)
-        .setHeader("Content-Type", "text/html")
-        .send(contentHtml);
+app.get("/user/account/:id", (req, res) => {
+    const userId = req.params.id;
+  console.log("userId:", userId);
+  const protocol = req.protocol;
+  const host = req.get('host');
+  const redirectUrl = `${protocol}://${host}/user/account.html?id=${userId}`;
+  res.redirect(redirectUrl);
+    // const userId = req.params.id;
+    // console.log("userId:", userId);
+    // const contentHtml = readFileSync(join(STATIC_PATH, "/user/account.html"), "utf-8");
+    // console.log("contentHtml", contentHtml);
+    // const modifiedContentHtml = contentHtml.replace(/{{userId}}/g, userId);
+    // console.log("modifiedContentHtml", modifiedContentHtml);
+    // res.status(200).setHeader("Content-Type", "text/html").send(modifiedContentHtml);
 });
-// //カートページ
-// app.get('/cart', (req, res) => {
-//     res.send('カートだよ');
-//     });
+
+app.get("/*", (req, res) => {
+    const url = req.originalUrl;
+    const contentHtml = readFileSync(join(STATIC_PATH, url + ".html"), "utf-8");
+    res.status(200).setHeader("Content-Type", "text/html").send(contentHtml);
+});
 
 
-// //マイページ
-// app.get('/account', (req, res) => {
-//     res.send('マイページだよ');
-//     });
+// app.get("/*", (req, res) => {
+//     const url = req.originalUrl;
+//     if (url === "/user/account.html") {
+//         const contentHtml = readFileSync(STATIC_PATH + "/user/account.html", "utf-8");
+//         res.status(200).setHeader("Content-Type", "text/html").send(contentHtml);
+//     } else {
+//         const contentHtml = readFileSync(STATIC_PATH + url + ".html", "utf-8");
+//         res.status(200).setHeader("Content-Type", "text/html").send(contentHtml);
+//     }
+// });
 
+
+// app.get("/*", (req, res) => {
+//     console.log(STATIC_PATH + req.originalUrl + ".html");
+//     const contentHtml = readFileSync(STATIC_PATH + req.originalUrl + ".html", "utf-8");//Syncがないと非同期処理になる
+//     res
+//         .status(200)
+//         .setHeader("Content-Type", "text/html")
+//         .send(contentHtml);
+// });
 
 app.listen(PORT, () => {
     console.log(`${PORT}番でサーバー起動`);

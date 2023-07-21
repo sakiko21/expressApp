@@ -10,7 +10,7 @@ export async function login (req,res) {
         return res.status(500).send(user.error);
     } 
     if(!user){
-        return res.status(401).send("ユーザーが見つかりません");
+        return res.status(401).send("ユーザーが見つかりませんlogin.js");
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -24,6 +24,7 @@ export async function login (req,res) {
         secure: process.env.NODE_ENV === 'production',
         maxAge: 1000 * 60 * 60 * 24,
     });
-    
+
     return res.status(200).json(user);
+    
     }
