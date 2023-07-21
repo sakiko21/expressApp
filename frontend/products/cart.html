@@ -12,10 +12,12 @@
         <h2 class="page-title">カートページ</h2>
         <div id="cart-container"></div>
         <div id="total-amount"></div>
-        <button id="purchase-button">購入</button>
-        <button id="clear-button">カートをクリア</button>
-        <a href="/products/catalog"><button id="back-button" >商品一覧に戻る</button></a>
-        <a href=""><button id="back-button" >マイページへ移動</button></a>
+        <div class="button-area">
+            <button id="purchase-button">購入</button>
+            <button id="clear-button">カートをクリア</button>
+            <a href="/products/catalog"><button id="back-button" >商品一覧に戻る</button></a>
+            <a href="/user/account.html"><button id="back-button" >マイページへ移動</button></a>
+        </div>
     </div>
     <script>
         window.onload = function() {

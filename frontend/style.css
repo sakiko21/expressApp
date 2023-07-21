@@ -57,3 +57,34 @@ a.top-button:hover {
 /*******************
 商品一覧ページ
 *******************/
+
+
+/*******************
+マイページ（テーブルはカートページと共有）
+*******************/
+
+table {
+    width: 550px;
+    margin: 0 auto;
+}
+
+td {
+    text-align: center;
+}
+/*******************
+カートページ
+*******************/
+div#total-amount {
+    width: 600px;
+    text-align: right;
+}
+.button-area {
+    margin-top: 30px;
+    width: 600px;
+    margin: 30px auto;
+    text-align: center;
+}
+
+div#cart-container {
+    text-align: center;
+}
