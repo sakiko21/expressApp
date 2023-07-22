@@ -9,8 +9,6 @@ app.post("/user/register", register);
 //ログインのAPI
 app.post("/user/login", login);
 // //マイページのAPI
-// app.get("/user/account/:id", userAuthentication, account);
-// }
 app.get("/user/account", userAuthentication, async (req, res) => {
     if (!req.user) {
         return res.status(401).json({ error: 'Unauthorized' });
