@@ -12,12 +12,13 @@ app.post("/user/login", login);
 // app.get("/user/account/:id", userAuthentication, account);
 // }
 app.get("/user/account", userAuthentication, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    } 
     try {
         const userId = req.user.id;
-
         // ユーザーの購入履歴を取得する
         const purchaseHistory = await sakikoDb.getPurchase(userId);
-
         res.status(200).json({ purchaseHistory });
     } catch (error) {
         console.log(error);

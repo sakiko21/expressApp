@@ -9,9 +9,11 @@
 </head>
 <body>
     <h2 class="page-title">マイページ</h2>
+    <p class="mypage-text">※複数商品を購入した場合、複数行に渡って表示します</p>
     <table id="purchase-history">
         <thead>
             <tr>
+                <th>ユーザーID</th>
                 <th>購入日時</th>
                 <th>商品名</th>
                 <th>購入個数</th>
@@ -27,43 +29,42 @@
 <script>
     // ページのロード時に実行する処理
 window.onload = function() {
-    // トークンをクッキーから取得する
-    const token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-
-    // トークンを使ってアカウントページへのリクエストを行う
+    // アカウントページへのリクエストを行う
     fetch('/user/account', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+        method: 'GET'
     })
-    // .then((res) => res.json())
     .then (async (response) => {
-        if (response.ok){
-        const data = await response.json();
-        const purchaseHistory = data.purchaseHistory;
-        console.log("purchaseHistory:",purchaseHistory);
+        if (response.status === 401){
+            //ログインしていない場合は、ログインページへリダイレクト
+            window.location.href = "/user/login";
+        } else if (response.ok) {
+            const data = await response.json();
+            const purchaseHistory = data.purchaseHistory;
+            console.log("purchaseHistory:",purchaseHistory);
 
-        const tableBody = document.querySelector('#purchase-history tbody');
-        purchaseHistory.forEach((purchase) => {
-            const { created_at, product_names, quantity, amount } = purchase;
+            const tableBody = document.querySelector('#purchase-history tbody');
+            purchaseHistory.forEach((purchase) => {
+                const { user_id, created_at, product_names, quantity, amount } = purchase;
 
-            const row = document.createElement('tr');
-            const dateCell = document.createElement('td');
-            const productNameCell = document.createElement('td');
-            const quantityCell = document.createElement('td');
-            const totalPriceCell = document.createElement('td');
+                const row = document.createElement('tr');
+                const userCell = document.createElement('td');
+                const dateCell = document.createElement('td');
+                const productNameCell = document.createElement('td');
+                const quantityCell = document.createElement('td');
+                const totalPriceCell = document.createElement('td');
+                
+                userCell.textContent = user_id;
+                dateCell.textContent = created_at;
+                productNameCell.textContent = product_names;
+                quantityCell.textContent = quantity;
+                totalPriceCell.textContent = amount;
 
-            dateCell.textContent = created_at;
-            productNameCell.textContent = product_names;
-            quantityCell.textContent = quantity;
-            totalPriceCell.textContent = amount;
-
-            row.appendChild(dateCell);
-            row.appendChild(productNameCell);
-            row.appendChild(quantityCell);                
-            row.appendChild(totalPriceCell);
-            tableBody.appendChild(row);
+                row.appendChild(userCell);
+                row.appendChild(dateCell);
+                row.appendChild(productNameCell);
+                row.appendChild(quantityCell);                
+                row.appendChild(totalPriceCell);
+                tableBody.appendChild(row);
             });
         } else {
             console.log("エラーレスポンス", response.status);
