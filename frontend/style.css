@@ -57,7 +57,39 @@ a.top-button:hover {
 /*******************
 商品一覧ページ
 *******************/
+@media screen and (min-width: 768px) {
+    div#product-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 25px;
+        grid-template-rows: 1fr 1fr 1fr 1fr;  
+        padding: 30px;
+    }
 
+}
+@media screen and (max-width: 767px) {
+    div#product-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        grid-template-rows: 1fr 1fr 1fr 1fr;
+        padding: 30px;
+    }
+
+}
+.product-item {
+    border: 1px solid #ddd;
+}
+.product-info {
+    text-align: center;
+    padding: 10px;
+}
+.product-a{
+    text-decoration: none;
+}
+img{
+    width: 100%;
+}
 
 /*******************
 マイページ（テーブルはカートページと共有）

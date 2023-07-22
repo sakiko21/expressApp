@@ -134,7 +134,7 @@
                         alert("購入しました");
                         localStorage.removeItem("cart");
                         //location.reload();
-                        window.location.href= `http://localhost:3000/user/account.html?id=${data.user_id}`;
+                        window.location.href= `/user/account.html?id=${data.user_id}`;
                     })
                     .catch(error => {
                         alert(error.message);
