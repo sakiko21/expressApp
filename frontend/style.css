@@ -115,6 +115,7 @@ td {
 div#total-amount {
     width: 600px;
     text-align: right;
+    margin: 0 auto;
 }
 .button-area {
     margin-top: 30px;
