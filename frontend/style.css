@@ -90,6 +90,9 @@ a.top-button:hover {
 img{
     width: 100%;
 }
+button#add-to-cart-button {
+    margin: 0 auto;
+}
 
 /*******************
 マイページ（テーブルはカートページと共有）
